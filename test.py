@@ -44,8 +44,10 @@ def get_properties(gu_name, eng_dong_name, hangul_dong_name, property_type, titl
 				dedicated_area = area[1]
 			else:
 				dedicated_area='NA'
-
-		price = re.findall(r"\d+,\d+", t.find('td', class_='num align_r').text)
+		try:
+			price = re.findall(r"\d+,\d+", t.find('td', class_='num align_r').text)[0]
+		except:
+			price = re.findall(r"\d+", t.find('td', class_='num align_r').text)[0]
 
 		row.append(gu_name)
 		row.append(eng_dong_name)
@@ -54,7 +56,7 @@ def get_properties(gu_name, eng_dong_name, hangul_dong_name, property_type, titl
 		row.append(property_type)
 		row.append(supply_area)
 		row.append(dedicated_area)
-		row.append(price[0])
+		row.append(price)
 
 		writer.writerow(row)
 
@@ -69,69 +71,51 @@ def add_page(gu_name, eng_dong_name, property_type, url, writer):
 	#print hangul_dong_name.decode('cp949')
 	get_properties(gu_name, eng_dong_name, hangul_dong_name, property_type, titles, writer)
 
+def create_file(gu, dong, apt_siteUrl, apt_page_num, house_siteUrl, house_page_num):
+	#gu='Gangnam'
+	#dong='Cheongdam'
+	filename='{0}_{1}.csv'.format(gu, dong)
 
-gu='Gangnam'
-dong='Cheongdam'
-filename='{0}_{1}_v2.csv'.format(gu, dong)
+	f=open(filename, 'ab')
+	writer = csv.writer(f)
 
-f=open(filename, 'ab')
-writer = csv.writer(f)
+	header = []
+	header.append('Gu')
+	header.append('Dong')
+	header.append('Dong')
+	#header.append('Building Name')
+	header.append('Property Type')
+	header.append('Supply Area')
+	header.append('Dedicated Area')
+	header.append('Price')
 
-header = []
-header.append('Gu')
-header.append('Dong')
-header.append('Dong')
-#header.append('Building Name')
-header.append('Property Type')
-header.append('Supply Area')
-header.append('Dedicated Area')
-header.append('Price')
+	writer.writerow(header)
 
-writer.writerow(header)
+	for i in range(1,int(apt_page_num)):
+		if apt_page_num==2:
+			add_page(gu, dong, 'apt', apt_siteUrl, writer)
+		else:
+			add_page(gu, dong, 'apt', apt_siteUrl.format(i), writer)
 
-for i in range(1,2):
+	for j in range(1,int(house_page_num)):
+		#gangnam house
+		if house_page_num==2:
+			add_page(gu, dong, 'house', house_siteUrl, writer)
+		else:
+			add_page(gu, dong, 'house', house_siteUrl.format(j), writer)
+	f.close()
 
-	#siteUrl = 'http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010300&articleOrderCode=&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2932&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#gaepo
-	#apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010300&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2523&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-
-	#Nonhyun
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010800&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.0313752&mapY=37.5135831&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#Daechi-dong
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010600&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.0654631&mapY=37.4991105&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#Dogok
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011800&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.0450504&mapY=37.4881434&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#Samseong
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010500&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.0553873&mapY=37.5147918&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010500&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2528&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#Segok
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011100&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.1046001&mapY=37.4643598&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011100&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2528&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#Suseo
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011500&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.1048862&mapY=37.4888562&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011500&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2528&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#Sinsa
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010700&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.0228994&mapY=37.5241419&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010700&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2528&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#Apgujeong
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011000&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.0236001&mapY=37.5291003&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011000&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2528&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#Yeoksam
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010100&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.0389498&mapY=37.4997761&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010100&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2332&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#Irwon
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011400&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.0816381&mapY=37.4874854&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011400&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2491&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#Jagok
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011200&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.1010002&mapY=37.4765999&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	#apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168011200&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm='
-	#Cheongdam
-	#siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010400&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=127.0523496&mapY=37.525492&mapLevel=10&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1168010400&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2528&ptpNo=&bssYm=&page={0}#_content_list_target'.format(i)
-	add_page(gu, dong, 'apt', apt_siteUrl, writer)
-
-for j in range(1,3):
-	#gangnam house
-	house_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=C03&tradeTypeCd=A1&rletNo=&cortarNo=1168010400&hscpTypeCd=C02%3AC03%3AC04%3AD05&mapX=&mapY=&mapLevel=&page={0}&articlePage=&ptpNo=&rltrId=&mnex=&bildNo=&articleOrderCode=-3&cpId=&period=&prodTab=&atclNo=&atclRletTypeCd=&location=2521&bbs_tp_cd=&sort=&siteOrderCode=#_content_list_target'.format(j)
-	add_page(gu, dong, 'house', house_siteUrl, writer)
-f.close()
+if __name__ == '__main__':
+	
+	f=open('guro_info.csv', 'rb')
+	reader = csv.reader(f)
+	#i=0
+	for r in reader:
+		#if i==9:
+		create_file(r[0], r[1], r[2], r[3], r[4], r[5])
+		#i+=1
+	'''
+	apt_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=A01&tradeTypeCd=A1&hscpTypeCd=A01%3AA03%3AA04&cortarNo=1150010300&articleOrderCode=-3&siteOrderCode=&cpId=&mapX=&mapY=&mapLevel=&minPrc=&maxPrc=&minWrrnt=&maxWrrnt=&minLease=&maxLease=&minSpc=&maxSpc=&subDist=&mviDate=&hsehCnt=&rltrId=&mnex=&mHscpNo=&mPtpRange=&mnexOrder=&location=2528&ptpNo=&bssYm=&page={0}#_content_list_target'
+	house_siteUrl='http://land.naver.com/article/articleList.nhn?rletTypeCd=C03&tradeTypeCd=A1&rletNo=&cortarNo=1150010300&hscpTypeCd=C02%3AC03%3AC04%3AD05&mapX=&mapY=&mapLevel=&page={0}&articlePage=&ptpNo=&rltrId=&mnex=&bildNo=&articleOrderCode=-3&cpId=&period=&prodTab=&atclNo=&atclRletTypeCd=&location=2866&bbs_tp_cd=&sort=&siteOrderCode=#_content_list_target'
+	create_file('Gangseo', 'Hwagok', apt_siteUrl, '28', house_siteUrl, '44')	
+	'''
