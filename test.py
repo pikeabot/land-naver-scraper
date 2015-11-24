@@ -34,8 +34,11 @@ def get_properties(gu_name, eng_dong_name, hangul_dong_name, property_type, titl
 		try:
 			supply_area = area[0]
 		except:
-			area = re.findall(r" \d+", t.find('p', class_='calc_area').text)
-			supply_area=area[0]
+			try:
+				area = re.findall(r" \d+", t.find('p', class_='calc_area').text)
+				supply_area=area[0]
+			except:
+				supply_area='NA'
 		try:
 			dedicated_area =  area[1]
 		except:
@@ -107,11 +110,11 @@ def create_file(gu, dong, apt_siteUrl, apt_page_num, house_siteUrl, house_page_n
 
 if __name__ == '__main__':
 	
-	f=open('guro_info.csv', 'rb')
+	f=open('pocheon_info.csv', 'rb')
 	reader = csv.reader(f)
-	#i=0
+	i=0
 	for r in reader:
-		#if i==9:
+		#if i >= 5:
 		create_file(r[0], r[1], r[2], r[3], r[4], r[5])
 		#i+=1
 	'''
